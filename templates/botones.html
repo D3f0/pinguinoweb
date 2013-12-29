@@ -1,0 +1,37 @@
+<html>
+<head>
+    <title>Esta es una palicación web</title>
+    <script src="/static/gauge.min.js"></script>
+    <script src="/static/jquery.js"></script>
+    <script src="/static/jquery-ui/js/jquery-ui-1.10.3.custom.js"></script>
+    <link rel="stylesheet" href="/static/jquery-ui/css/ui-lightness/jquery-ui-1.10.3.custom.css">
+</head>
+<body>
+    <h1>Encabezado</h1>
+    <ul>
+        <input type="checkbox" pin="0" id="led_0"><label for="led_0">Led 0</label>
+        <input type="checkbox" pin="1" id="led_1"><label for="led_1">Led 1</label>
+        <input type="checkbox" pin="2" id="led_2"><label for="led_2">Led 2</label>
+        <input type="checkbox" pin="3" id="led_3"><label for="led_3">Led 3</label>
+        <input type="checkbox" pin="4" id="led_4"><label for="led_4">Led 4</label>
+        <input type="checkbox" pin="5" id="led_5"><label for="led_5">Led 5</label>
+        <input type="checkbox" pin="6" id="led_6"><label for="led_6">Led 6</label>
+        <input type="checkbox" pin="7" id="led_7"><label for="led_7">Led 7</label>
+    </ul>
+    <hr/>
+    <script type="text/javascript">
+        $(function () {
+            var botones = $('input').button();
+            botones.click(function (){
+                var este_boton = $(this);
+                var pulsado = este_boton.is(':checked');
+                var pin = este_boton.attr('pin');
+
+                $.post("/cambiar_led", {"pin": pin, "pulsado": pulsado});
+            });
+
+        });
+
+    </script>
+</body>
+</html>

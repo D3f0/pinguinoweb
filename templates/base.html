@@ -1,0 +1,35 @@
+<html>
+<head>
+    <title>Esta es una palicación web</title>
+    <script src="/static/gauge.min.js"></script>
+    <script src="/static/jquery.js"></script>
+</head>
+<body>
+    <h1>Encabezado</h1>
+    <p>
+        El numero es: <span id="numero">obteniendo...</span>
+    </p>
+    <hr/>
+    <script type="text/javascript">
+        $(function () {
+
+            function actualizarValor() {
+                $.ajax('/dato', {
+                    success: function (data, status, xhr){
+                        //alert(data);
+                        $('#numero').text(data);
+                    },
+                    error: function () {
+                        alert("Error");
+                    }
+                });
+
+
+            }
+
+            window.setInterval(actualizarValor, 1000);
+        });
+
+    </script>
+</body>
+</html>

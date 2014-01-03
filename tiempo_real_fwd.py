@@ -6,6 +6,9 @@ import gevent.monkey
 from gevent.pywsgi import WSGIServer
 import sys
 import zmq.green as zmq
+import time
+import math
+import json
 
 
 gevent.monkey.patch_all()
@@ -67,9 +70,10 @@ def sender():
     sock.connect(DIRECCION_ENTRADA)
     count = 0
     while True:
-        gevent.sleep(1)
-        print "Sending %s" % count
-        sock.send(str(count))
+        gevent.sleep(0.01)
+        x = time.time() * 1000
+        y = 2.5 * (1 + math.sin(x / 500))
+        sock.send(json.dumps(dict(x=x, y=y)))
         count += 1
 
 

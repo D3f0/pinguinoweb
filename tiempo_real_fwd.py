@@ -13,19 +13,17 @@ gevent.monkey.patch_all()
 
 from flask import Flask, request, Response, render_template
 
-#import zmq
-#from zmq import devices
-
-# print "ZMQ"
-
 
 app = Flask(__name__)
 app.debug = True
+app.context = zmq.Context(1)
+
+DIRECCION_ENTRADA = 'tcp://127.0.0.1:5555'
+DIRECCION_SALIDA = 'inproc://queue'
 
 
-def retransmisor(context,
-                 dir_entrada='tcp://*:5555',
-                 dir_salida='tcp://*:5566'):
+def retransmisor(dir_entrada=DIRECCION_ENTRADA,
+                 dir_salida=DIRECCION_SALIDA):
     '''Utiliza un dipositivo forwareder para retransmitir mensajes
     desde un extremo subscriptor, hacia una extremo emisor. Pueden
     existir múltiples emisores y múltiples receptores conectados
@@ -33,14 +31,13 @@ def retransmisor(context,
     Ver https://learning-0mq-with-pyzmq.readthedocs.org/en/latest/pyzmq/devices/forwarder.html
     '''
     try:
-        entrada = context.socket(zmq.SUB)
+        entrada = app.context.socket(zmq.SUB)
         entrada.bind(dir_entrada)
         entrada.setsockopt(zmq.SUBSCRIBE, '')
 
-        salida = context.socket(zmq.SUB)
+        salida = app.context.socket(zmq.PUB)
         salida.bind(dir_salida)
         print "Launching device"
-        print
         zmq.device(zmq.FORWARDER, entrada, salida)
     except Exception, e:
         print e
@@ -48,20 +45,32 @@ def retransmisor(context,
     finally:
         entrada.close()
         salida.close()
-        context.term()
+        app.context.term()
 
 
 def event_stream():
-    count = 0
+    sock = app.context.socket(zmq.SUB)
+    sock.connect(DIRECCION_SALIDA)
+    sock.setsockopt(zmq.SUBSCRIBE, "")
     while True:
-        gevent.sleep(2)
-        yield 'data: %s\n\n' % count
-        count += 1
+        data = sock.recv()
+        yield 'data: %s\n\n' % data
 
 
 @app.route('/my_event_source')
 def sse_request():
     return Response(event_stream(), mimetype='text/event-stream')
+
+
+def sender():
+    sock = app.context.socket(zmq.PUB)
+    sock.connect(DIRECCION_ENTRADA)
+    count = 0
+    while True:
+        gevent.sleep(1)
+        print "Sending %s" % count
+        sock.send(str(count))
+        count += 1
 
 
 @app.route('/')
@@ -73,13 +82,14 @@ def main():
     host, port = '0.0.0.0', 8080
     print "Running server at {host}:{port}".format(host=host, port=port)
 
-    context = zmq.Context(1)
-    gevent.spawn(retransmisor, context)
+    gevent.spawn(retransmisor)
+    gevent.spawn(sender)
     http_server = WSGIServer((host, port), app)
     http_server.serve_forever()
+
 
     #http_server.serve_forever()
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

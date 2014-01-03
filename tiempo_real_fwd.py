@@ -70,7 +70,7 @@ def sender():
     sock.connect(DIRECCION_ENTRADA)
     count = 0
     while True:
-        gevent.sleep(0.01)
+        gevent.sleep(0.1)
         x = time.time() * 1000
         y = 2.5 * (1 + math.sin(x / 500))
         sock.send(json.dumps(dict(x=x, y=y)))

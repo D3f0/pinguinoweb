@@ -103,6 +103,12 @@ def index():
     '''Página principal desde donde se accede al resto de las páginas'''
     return render_template('index.html')
 
+
+@app.route('/nvd3_plot/')
+def nvd3_plot():
+    '''Uses example take from http://jsfiddle.net/BjRLy/133/'''
+    return render_template('nvd3_plot.html')
+
 def main():
     '''Función mainl del programa'''
 

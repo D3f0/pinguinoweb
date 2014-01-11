@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <title></title>
+        <link rel="stylesheet" href="/static/nvd3-master/nv.d3.min.css">
+        <script src="/static/nvd3-master/lib/d3.v3.js"></script>
+        <script src="/static/nvd3-master/nv.d3.min.js"></script>
+    </head>
+
+    <body>
+        <div id="chart">
+            <svg />
+        </div>
+        <script>
+            var data = [{
+                "key": "Potencia",
+                "values": getData()
+            }];
+            var chart;
+            var duration= 5000;
+            function redraw() {
+
+
+               nv.addGraph(function () {
+               chart = nv.models.cumulativeLineChart()
+                              .x(function (d) { return d.x })
+                              .y(function (d) { return d.y / 100 })
+                              .color(d3.scale.category10().range());
+
+
+                chart.xAxis
+                    .tickFormat(function (d) {
+                        return d3.time.format('%x')(new Date(d))
+                    });
+
+                chart.yAxis
+                    .tickFormat(d3.format(',.1%'));
+
+                d3.select('#chart svg')
+                    .datum(data)
+                    .transition().duration(duration)
+                    .call(chart);
+
+                nv.utils.windowResize(chart.update);
+
+                return chart;
+            });
+
+
+            }
+
+            function getData() {
+                var arr = [];
+                var theDate = new Date(2012, 01, 01, 0, 0, 0, 0);
+                for (var x = 0; x < 30; x++) {
+                    arr.push({x: new Date(theDate.getTime()), y: Math.random() * 100});
+                    theDate.setDate(theDate.getDate() + 1);
+                }
+                return arr;
+            }
+
+            setInterval(function () {
+                var long = data[0].values;
+                var next = new Date(long[long.length - 1].x);
+                next.setDate(next.getDate() + 1)
+                long.shift();
+                long.push({x:next.getTime(), y:Math.random() * 100});
+                redraw();
+            }, duration);
+
+
+
+
+        </script>
+    </body>
+</html>

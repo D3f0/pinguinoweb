@@ -1,0 +1,34 @@
+<html>
+<head>
+    <title>Secuencial de Leds</title>
+    <script src="/static/jquery.js"></script>
+    <script src="/static/jquery-ui/js/jquery-ui-1.10.3.custom.js"></script>
+    <link rel="stylesheet" href="/static/jquery-ui/css/ui-lightness/jquery-ui-1.10.3.custom.css">
+</head>
+<body>
+    <h1>Pingüino PIC18F4550</h1>
+    <p>Ejemplo de Salidas Digitales usando tablet como Interface<br/>
+    <p>Aplicación: Placa con 8 diodos LEDS conectados al Puerto B<br/>
+    <ul>
+        <input type="checkbox" pin="0" id="led_0"><label for="led_0">Efecto 0</label>
+        <input type="checkbox" pin="1" id="led_1"><label for="led_1">Efecto 1</label>
+        <input type="checkbox" pin="2" id="led_2"><label for="led_2">Efecto 2</label>
+        <input type="checkbox" pin="3" id="led_3"><label for="led_3">Efecto 3</label>
+        <input type="checkbox" pin="4" id="led_4"><label for="led_4">Efecto 4</label>
+    </ul>
+    <hr/>
+    <script type="text/javascript">
+        $(function () {
+            var botones = $('input').button();
+            botones.click(function (){
+                var este_boton = $(this);
+                var pulsado = este_boton.is(':checked');
+                var pin = este_boton.attr('pin');
+                $.post("/mi_secuencial", {"pin": pin, "pulsado": pulsado});
+            });
+
+        });
+
+    </script>
+</body>
+</html>

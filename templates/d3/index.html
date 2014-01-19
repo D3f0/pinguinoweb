@@ -1,0 +1,146 @@
+<html>
+    <head>
+        <title>
+        {% block title %}{% if title %}{{ title }}{% else %}Pruebas con D3{% endif %}{% endblock title %}
+        </title>
+        <script type="text/javascript" src="/static/jquery.js"></script>
+        <script src="/static/nvd3-master/lib/d3.v3.js"></script>
+
+        <link rel="stylesheet" href="/static/nvd3-master/nv.d3.min.css">
+        <script src="/static/nvd3-master/nv.d3.min.js"></script>
+    </head>
+    <body>
+        <h1>Por acá abajo debería venir un SVG</h1>
+        <!-- embed id="svg" src="/static/svg/dibujo1.svg" type="image/svg+xml" -->
+        <div id="holder"></div>
+        <script>
+            function useSVGColorOnContainer(svg) {
+                if (arguments.length == 0) {
+                    svg = d3.select('svg');
+                }
+                var page_color = svg.select('[pagecolor]').attr('pagecolor');
+                var element = svg.node().parentElement;
+                d3.select(element).style('background-color', page_color);
+            }
+
+            function removeTspan(text_el) {
+                var tspan = text_el.select('tspan');
+                var text = tspan.text();
+                tspan.remove();
+                text_el.text(text);
+                return text_el;
+            }
+
+            function centerTextGroups(svg) {
+                var bg_el_selector = 'rect,circle';
+
+                if (arguments.length == 0) {
+                    svg = d3.select('svg');
+                }
+                svg.selectAll('g text').each(function () {
+                    var text_el =  d3.select(this);
+                    var back_el = d3.select(this.parentElement).select(bg_el_selector);
+                    removeTspan(text_el);
+
+                    var back_bbox = back_el.node().getBBox();
+                    var attrs = {
+                            "x": (back_bbox.x + (back_bbox.width / 2)),
+                            "y": (back_bbox.y + (back_bbox.height / 2)),
+                            'text-anchor': 'middle',
+                            'alignment-baseline': 'middle'
+                    }
+                    //console.log('Centering', text_el.node(), 'with', attrs);
+                    //console.log(text_el.attr('x'), text_el.attr('y'), text_el.attr('transform'));
+                    text_el.attr(attrs);
+                });
+            }
+
+            function removeTransform(el) {
+                el = d3.select(el);
+                var bbox = el.node().getBBox();
+            }
+
+            function centerRotate(el) {
+                el = d3.select(el);
+                var bbox = el.node().getBBox();
+                var cx = bbox.x + (bbox.width/2);
+                var cy = bbox.y + (bbox.height/2);
+                el.append('animateTransform').attr({
+                    attributeName: 'transform',
+                    type: "rotate",
+                    //from: "0 "+cx+" "+cy,
+                    //to: "360 "+cx+" "+cy,
+                    from: '0 100 400', to: '360',
+                    from: "0", to: "360",
+                    dur: "10s",
+                    repeatCount: "indefinite"
+                });
+            }
+
+            function wrapElement(el, tag, attrs) {
+                return;
+                tag = tag || 'g';
+                attrs = attrs || {};
+                var node = d3.select(el).node();
+                var parent = node.parentElement;
+                parent.removeChild(node);
+                d3.select(parent).append('g').append(node);
+                //debugger
+
+            }
+            function init() {
+                var url = '/static/svg/dibujo1.svg' + '?'+(new Date().getTime());
+                var holder = $('#holder').load(url, function (data) {
+                    console.log("SVG loaded", url);
+                    var svg = d3.select('svg');
+                    svg.on('click', function (evt) { debugger });
+                    useSVGColorOnContainer();
+                    centerTextGroups(svg);
+                    //centerRotate('#engranaje');
+                    wrapElement('#engranaje', 'g');
+                });
+            }
+
+
+            $(init);
+
+        </script>
+
+    </body>
+        <table>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                </tr>
+            </tbody>
+        </table>
+</html>

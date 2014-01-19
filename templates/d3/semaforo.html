@@ -1,0 +1,62 @@
+<html>
+    <head>
+    <title>Semáforo</title>
+    <script type="text/javascript" src="/static/jquery.js"></script>
+    <script src="/static/nvd3-master/lib/d3.v3.js"></script>
+    </head>
+
+    <body>
+        <div id="conenedor" style="width: 80%; float: left;">
+        </div>
+        <div style="width: 15%; float: right;">
+        <form action="">
+
+            <input type="radio" name="luz" value="luz_roja">Rojo</input>
+            <br>
+            <input type="radio" name="luz" value="luz_amarilla">Amarillo</input>
+            <br>
+            <input type="radio" name="luz" value="luz_verde">Verde</input>
+        </form>
+        </div>
+        <script>
+
+
+            function inicializar() {
+
+                // Se llama cuando se termine de descarar el SVG
+                function svgCargado () {
+
+                }
+                // Pedir a jQUery que descarge el SVG y lo meta adentro del DIV id=conenedor
+                $('#conenedor').load('/static/svg/semaforo.svg',  svgCargado );
+
+
+                function cambioRadioLuz () {
+                    var value = $(this).attr('value');
+                    var svg = d3.select('svg');
+                    switch (value) {
+                        case 'luz_roja':
+                            svg.select('#luz_roja').transition().style('fill', 'red');
+                            svg.select('#luz_amarilla').transition().style('fill', 'black');
+                            svg.select('#luz_verde').transition().style('fill', 'black');
+                            break;
+                        case 'luz_amarilla':
+                            svg.select('#luz_roja').transition().style('fill', 'black');
+                            svg.select('#luz_amarilla').transition().style('fill', 'yellow');
+                            svg.select('#luz_verde').transition().style('fill', 'black');
+                            break;
+                        case 'luz_verde':
+                            svg.select('#luz_roja').transition().style('fill', 'black');
+                            svg.select('#luz_amarilla').transition().style('fill', 'black');
+                            svg.select('#luz_verde').transition().style('fill', 'green');
+                            break;
+                    }
+                }
+                $('input[name=luz]').change(cambioRadioLuz)
+            }
+
+            $(inicializar);
+
+        </script>
+    </body>
+</html>

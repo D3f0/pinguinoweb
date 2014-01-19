@@ -1,13 +1,13 @@
 <html>
 <head>
-    <title>Esta es una palicación web</title>
+    <title>Esta es una aplicación web</title>
     <script src="/static/gauge.min.js"></script>
     <script src="/static/jquery.js"></script>
 </head>
 <body>
-    <h1>Encabezado</h1>
+    <h1>Pingüino PIC18F4550</h1>
     <p>
-        El numero es: <span id="numero">obteniendo...</span>
+        El valor analógico del pin es: <span id="numero">obteniendo...</span>
     </p>
     <hr/>
     <script type="text/javascript">
@@ -23,11 +23,9 @@
                         alert("Error");
                     }
                 });
-
-
             }
 
-            window.setInterval(actualizarValor, 1000);
+            window.setInterval(actualizarValor, 500);
         });
 
     </script>

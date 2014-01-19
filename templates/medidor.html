@@ -1,14 +1,13 @@
 <html>
 <head>
-    <title>Esta es una palicación web</title>
+    <title>Entrada Analógica</title>
     <script src="/static/gauge.min.js"></script>
     <script src="/static/jquery.js"></script>
 </head>
 <body>
-    <h1>Encabezado</h1>
-    <p>
-        Potenciometro<br/>
-        <canvas width="400" height="300" id="potenciometro"></canvas>
+    <h1>Pingüino PIC18F4550</h1>
+    <p>Ejemplo de Entrada Analógica con Potenciómetro<br/>
+    <canvas width="500" height="300" id="potenciometro"></canvas>
     </p>
     <hr/>
     <script type="text/javascript">
@@ -36,6 +35,7 @@
             gauge.maxValue = 1024; // set max gauge value
             gauge.animationSpeed = 32; // set animation speed (32 is default value)
             gauge.set(0); // set actual value
+
 
             function actualizarValor() {
                 $.ajax('/dato', {

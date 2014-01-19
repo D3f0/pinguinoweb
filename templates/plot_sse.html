@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <script type="text/javascript" src="/static/jquery.js"></script>
+        <script type="text/javascript" src="/static/flot/jquery.flot.js"></script>
+        <script type="text/javascript">
+            $(function () {
+                // return;
+                var $placeholder = $('#placeholder');
+                var datalen = 100;
+                var plot = null;
+                var series = {
+                    label: "Value",
+                    lines: {
+                        show: true,
+                        fill: true,
+                        shadowSize: 25
+                    },
+                    points: {
+                        show:true
+                    },
+                    data: []
+                };
+                function updater(evt) {
+                    var data = [];
+                    var d = $.parseJSON(evt.data);
+                    series.data.push([d.x, d.y]);
+                    while (series.data.length > datalen) {
+                        series.data.shift();
+                    }
+
+                    if(plot) {
+                        plot.setData([series]);
+                        plot.setupGrid();
+                        plot.draw();
+                    } else if(series.data.length > 10) {
+                        plot = $.plot($placeholder, [series], {
+                            xaxis:{
+                                mode: "time",
+                                timeformat: "%H:%M:%S",
+                                minTickSize: [2, "second"],
+                            },
+                            yaxis: {
+                                min: 0,
+                                max: 5
+                            }
+                        });
+                        plot.draw();
+                    }
+                }
+
+                function updateul (evt) {
+                    console.log('A message has arrived!');
+                    $('#output').append('<li>'+evt.data+'</li>');
+                }
+
+                sse = new EventSource('/my_event_source');
+                sse.onmessage = updater;
+            });
+
+
+        </script>
+    </head>
+
+    <body>
+
+        <h2>Demo</h2>
+
+        <ul id="output">
+
+        </ul>
+        <div id="placeholder" style="width:600px;height:300px;"></div>
+    </body>
+
+</html>

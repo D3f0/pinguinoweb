@@ -1,34 +1,30 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request
-from random import randint
 from pynguino import PinguinoProcessing
 
-p = PinguinoProcessing()
-p.RecursiveConect()
+# Comunicación y setup con Pingüino PIC18F4550
+pinguino = PinguinoProcessing()
+pinguino.RecursiveConect()
 
 pote = 13
-p.pinMode(pote, "input")
+pinguino.pinMode(pote, "input")
 
 for pin in range(8):
-    p.pinMode(pin, "output")
-    p.digitalWrite(pin, 0)
-# Tratado del puerto serial
-# pinguino=serial.Serial("/dev/ttyACM0")
-
+    pinguino.pinMode(pin, "output")
+    pinguino.digitalWrite(pin, 0)
 
 # Aplicacion web
 app = Flask(__name__)
 
-
-# Pagina que está en "incio"
-@app.route("/")
+# Pagina que está en "inicio"
+@app.route("/base")
 def hello():
     return render_template('base.html')
 
 @app.route("/dato")
 def dato():
     """Obtiene el dato del pin 13"""
-    return str(p.analogRead(pote))
+    return str(pinguino.analogRead(pote))
 
 
 @app.route('/medidor')
@@ -49,7 +45,7 @@ def cambiar_led():
     else:
         estado = 0
     print "Estableciendo", pin, estado
-    p.digitalWrite(pin, estado)
+    pinguino.digitalWrite(pin, estado)
     return ""
 
 if __name__ == "__main__":

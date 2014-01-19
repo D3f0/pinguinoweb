@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <script type="text/javascript" src="/static/jquery.js"></script>
+        <script src="/static/jquery.knob.js"></script>
+
+    </head>
+    <body>
+        por acá va el knob
+        <div id="knob1"
+        data-width="150"
+        data-cursor=true
+        data-thickness=.3
+        data-fgColor="#222222"
+        ></div>
+        <span id="valor">0</span>
+    </body>
+
+    <script>
+        function inicalizar (argument) {
+            $('#knob1').knob({
+                cursor: true,
+                min: 0,
+                max: 1023,
+                change: function (valor) {
+                    $('#valor').text(valor);
+                    $.ajax('/analog_write/11/'+valor+'/');
+                }
+            });
+        }
+        $(inicalizar);
+    </script>
+
+</html>

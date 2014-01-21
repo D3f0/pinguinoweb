@@ -1,13 +1,12 @@
 #!/usr/bin/env python2
 
-import atexit
-import time
 import os
-
-from flask import Flask, Response, render_template
-from utils import add_headers
+import time
 import sys
 
+from flask import Flask, Response, render_template
+
+# Tratamiento de imagenes
 import cv2
 from PIL import Image
 from cStringIO import StringIO
@@ -19,11 +18,6 @@ VELOCIDAD = 0.0
 capture = None
 
 
-def limpieza():
-    if capture is not None:
-        capture.release()
-
-atexit.register(limpieza)
 
 app = Flask(__name__)
 
@@ -39,8 +33,8 @@ mjpeg_content_type = 'multipart/x-mixed-replace; boundary=--jpgboundary'
 
 @app.route('/camara/<int:ancho>/<int:alto>/')
 def cam(ancho, alto):
-    # https://gist.github.com/n3wtron/4624820
     def camara_stream():
+        global capture
         capture = cv2.VideoCapture(0)
         capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, ancho)
         capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, alto)

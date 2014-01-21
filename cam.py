@@ -23,7 +23,6 @@ app = Flask(__name__)
 
 
 @app.route('/')
-@add_headers(a=1, b=2)
 def index():
     return render_template('cam.html',
                             camara_url='http://127.0.0.1:5000/camara/320/240/')

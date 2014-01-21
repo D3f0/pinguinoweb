@@ -13,7 +13,7 @@ from cStringIO import StringIO
 
 PUERTO_WEB = 5000
 ANCHO, ALTO = 640, 480
-VELOCIDAD = 0.0
+RETARDO = 0.001
 
 capture = None
 
@@ -25,18 +25,18 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('cam.html',
-                            camara_url='http://127.0.0.1:5000/camara/320/240/')
+                            camara_url='http://127.0.0.1:5000/stream')
 
 mjpeg_content_type = 'multipart/x-mixed-replace; boundary=--jpgboundary'
 
 
-@app.route('/camara/<int:ancho>/<int:alto>/')
-def cam(ancho, alto):
+@app.route('/stream')
+def cam():
     def camara_stream():
         global capture
         capture = cv2.VideoCapture(0)
-        capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, ancho)
-        capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, alto)
+        capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 320)
+        capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 240)
         capture.set(cv2.cv.CV_CAP_PROP_SATURATION, 0.2)
 
         try:
@@ -48,15 +48,18 @@ def cam(ancho, alto):
                 jpg = Image.fromarray(imgRGB)
                 tmpfp = StringIO()
                 jpg.save(tmpfp, 'JPEG')
+
+                tmpfp.seek(0, os.SEEK_END)
+                length = tmpfp.tell()
+                tmpfp.seek(0)
+
                 yield '--jpgboundary\r\n'
                 yield 'Content-length: image/jpeg\r\n'
-                tmpfp.seek(0, os.SEEK_END)
                 yield 'Content-length: %d\r\n' % tmpfp.tell()
                 yield '\r\n'
-                tmpfp.seek(0)
                 yield '%s\r\n\r\n' % tmpfp.getvalue()
                 del tmpfp  # Performance?
-                time.sleep(VELOCIDAD)
+                time.sleep(RETARDO)
 
         except Exception as e:
             print e

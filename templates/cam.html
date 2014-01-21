@@ -1,12 +1,39 @@
 <html>
     <head>
         <title>Pruebas con cámara</title>
-        <script></script>
+        <script src="/static/cam/eventemitter2.min.js"></script>
+        <script src="/static/cam/mjpegcanvas.min.js"></script>
+        <script src="/static/jquery.js"></script>
     </head>
     <body>
         <h1>Pruebas con cámara</h1>
         <p>Esta es una prueba con cámara usando PyGame y AJAX</p>
-        <img src="{{camara_url}}" alt="Imagen de Cámara">
+        <img id="img_mjpeg" src="{{camara_url}}" alt="Imagen de Cámara">
+        <p>Si no funciona,
+        <a href="" id="makecanvas">probar la versión con canvas</a></p>
+
+        <script>
+        $(function () {
+            $('#makecanvas').on('click', function (event) {
+                event.preventDefault();
+                var $img = $('#img_mjpeg');
+                var url = $img.attr('src');
+
+                $img.before('<div id="img_canvas"></div>').remove();
+                var viewer = new MJPEGCANVAS.Viewer({
+                    divID : 'img_canvas',
+                    host : 'localhost',
+                    port: 5000,
+                    width : 320,
+                    height : 240,
+                    topic : '/camara/'
+                });
+
+                return false;
+            });
+        });
+
+        </script>
     </body>
 
 </html>

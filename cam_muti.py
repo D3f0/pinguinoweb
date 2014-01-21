@@ -85,12 +85,12 @@ app.context = zmq.Context(1)
 @app.route('/')
 def index():
     return render_template('cam.html',
-                            camara_url='http://127.0.0.1:5000/camara/')
+                            camara_url='http://127.0.0.1:5000/stream')
 
 mjpeg_content_type = 'multipart/x-mixed-replace; boundary=--jpgboundary'
 
 
-@app.route('/camara/')
+@app.route('/stream')
 def cam():
     def camara_stream():
         try:

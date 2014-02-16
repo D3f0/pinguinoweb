@@ -9,6 +9,9 @@ import zmq.green as zmq
 import time
 import math
 import json
+import random
+import werkzeug.serving
+
 
 
 gevent.monkey.patch_all()
@@ -24,6 +27,11 @@ app.context = zmq.Context(1)
 DIRECCION_ENTRADA = 'tcp://127.0.0.1:5555'
 DIRECCION_SALIDA = 'inproc://queue'
 
+
+@app.route('/')
+def index():
+    '''Página principal desde donde se accede al resto de las páginas'''
+    return render_template('index.html')
 
 def retransmisor(dir_entrada=DIRECCION_ENTRADA,
                  dir_salida=DIRECCION_SALIDA):
@@ -51,7 +59,7 @@ def retransmisor(dir_entrada=DIRECCION_ENTRADA,
         app.context.term()
 
 
-def event_stream():
+def generador_de_eventos():
     '''Una función que envía acutalizaciones usando el protocolo de
     eventos emitidos por el servidor (SSE). La directiva yield retorna
     un valor, pero la función conserva su estado ante cada llamada, por
@@ -61,16 +69,17 @@ def event_stream():
     sock.setsockopt(zmq.SUBSCRIBE, "")
     while True:
         data = sock.recv()
+        # Yield retorna un valor pero guarda estado de una función
         yield 'data: %s\n\n' % data
 
 
-@app.route('/my_event_source')
+@app.route('/datos_tiempo_real/')
 def sse_request():
     '''URL donde se publican los eventos'''
-    return Response(event_stream(), mimetype='text/event-stream')
+    return Response(generador_de_eventos(), mimetype='text/event-stream')
 
 
-def sender():
+def genera_datos():
     '''Función que genera una onda senoidal tomando el clock
     de la PC'''
     sock = app.context.socket(zmq.PUB)
@@ -79,18 +88,18 @@ def sender():
     diferencia_horaria = 3 * 60 * 60  # horas minutos segundos
 
     while True:
-        gevent.sleep(0.1)
+        gevent.sleep(.50)
 
-        x = (time.time() * 1000) + diferencia_horaria
-        y = 2.5 * (1 + math.sin(x / 500))
+        x = (time.time() * 1000) #+ diferencia_horaria
+        #y = 2.5 * (1 + math.sin(x / 500))
+        y = random.randrange(1,1000)/float(100)
         sock.send(json.dumps(dict(x=x, y=y)))
-
 
 
 @app.route('/plot/')
 def page():
     '''Dibujado de curvas en tiempo real'''
-    return render_template('plot_sse.html')
+    return render_template('plot_sse.html', )
 
 
 @app.route('/analog/')
@@ -98,20 +107,22 @@ def slider():
     '''Visualización de entradas analógicas'''
     return render_template('analog.html')
 
-@app.route('/')
-def index():
-    '''Página principal desde donde se accede al resto de las páginas'''
-    return render_template('index.html')
-
 
 @app.route('/nvd3_plot/')
 def nvd3_plot():
     '''Uses example take from http://jsfiddle.net/BjRLy/133/'''
     return render_template('nvd3_plot.html')
 
+@app.route('/nvd3_plot_sse/')
+def nvd3_plot_sse():
+    '''Utiliza el código de plot de NVD3 pero con fuente
+    de eventos SSE'''
+    return render_template('nvd3_plot_sse.html')
+
+
+@werkzeug.serving.run_with_reloader
 def main():
     '''Función mainl del programa'''
-
     host, port = '0.0.0.0', 8080  # 0.0.0.0 significa todas las conexiones
                                   # (inalámbricas, cableadas, loopback) que
                                   # posea la computadora.
@@ -119,10 +130,10 @@ def main():
     print "Running server at {host}:{port}".format(host=host, port=port)
 
     gevent.spawn(retransmisor)
-    gevent.spawn(sender)
+    gevent.spawn(genera_datos)
     http_server = WSGIServer((host, port), app)
     http_server.serve_forever()
-
+    print "hola"
 
     #http_server.serve_forever()
 

@@ -8,7 +8,7 @@
             $(function () {
                 // return;
                 var $placeholder = $('#placeholder');
-                var datalen = 100;
+                var datalen = 20;
                 var plot = null;
                 var series = {
                     label: "Value",
@@ -25,6 +25,7 @@
                 function updater(evt) {
                     var data = [];
                     var d = $.parseJSON(evt.data);
+                    console.log("Llegan datos ", d);
                     series.data.push([d.x, d.y]);
                     while (series.data.length > datalen) {
                         series.data.shift();
@@ -34,7 +35,7 @@
                         plot.setData([series]);
                         plot.setupGrid();
                         plot.draw();
-                    } else if(series.data.length > 10) {
+                    } else if(series.data.length > 2) {
                         plot = $.plot($placeholder, [series], {
                             xaxis:{
                                 mode: "time",
@@ -43,7 +44,7 @@
                             },
                             yaxis: {
                                 min: 0,
-                                max: 5
+                                max: 10
                             }
                         });
                         plot.draw();
@@ -54,9 +55,16 @@
                     console.log('A message has arrived!');
                     $('#output').append('<li>'+evt.data+'</li>');
                 }
-
-                sse = new EventSource('/my_event_source');
+                // Elemento para recibir datos sin preguntar por ello (HTML5)
+                sse = new EventSource('/datos_tiempo_real/');
+                // Función que se llama cuando llegan datos
                 sse.onmessage = updater;
+                sse.onerror = function () {
+                    window.setTimeout(function () {
+
+                        window.location.reload();
+                    }, 1500);
+                }
             });
 
 

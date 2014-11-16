@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>{% if title %}{{title}}{%else%}Sin título{%endif%}</title>
+        <!-- En vez de jQUery, importamos brython -->
+        <script src="/static/brython/brython.js"></script>
+        <script type="text/python">
+            from browser import document, alert, websocket
+
+            def llega_mensaje(mensaje):
+                document["un_texto"].text = mensaje.data
+
+
+            ws = websocket.websocket('ws://localhost:5000/websocket')
+            ws.bind('message', llega_mensaje)
+
+            def on_click(ev):
+                alert("Me hiciciste click!!")
+
+            document["prueba"].bind("click", on_click)
+
+
+
+        </script>
+    </head>
+    <body onload="brython()">
+        Hola mundo!
+        <button id="prueba">CLICK</button>
+
+        <p id="un_texto"></p>
+    </body>
+</html>

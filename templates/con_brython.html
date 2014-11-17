@@ -6,12 +6,7 @@
 
     </head>
     <body onload="brython()">
-        Hola mundo!
-        <button id="prueba">CLICK</button>
 
-        <p id="un_texto">
-            &nbsp;
-        </p>
         <object
             data="/static/svg/ledarray.svg"
             type="image/svg+xml"
@@ -22,54 +17,65 @@
 
     <script type="text/python">
         from browser import document, alert, websocket
-        import json
         from javascript import JSObject
+        import json
+        import time
+
+
+        ws = None
+
+
+        class SVG(object):
+            '''Envoltura sobre SVG para acceder más fácil y rápidamente a los
+                elementos del svg
+            '''
+            def __init__(self, svg_id):
+                node = JSObject(document[svg_id])
+                self.root = JSObject(node.contentDocument)
+                self.cache = {}
+
+            def __getitem__(self, key):
+                if key not in self.cache:
+                    self.cache[key] = JSObject(self.root.getElementById(key))
+                return self.cache[key]
 
         COLOR_APAGADO = '#333'
         COLOR_ENCENDIDO = 'green'
 
-        # Guardar la referencia al SVG embebido con <object>
-        ledArray = JSObject(JSObject(document['ledarray']).contentDocument)
+        svg = SVG('ledarray')
 
-        def get_led(n):
-            selector_id = 'led%d' % n
-            return JSObject(ledArray.getElementById(selector_id))
-
-        def estilo_led(n, fondo):
-            '''Cambia el color de un led'''
-            led = get_led(n)
-            led.style.fill = fondo
-
-        def estilo_leds(fondo):
-            '''Cambia el color de todos los leds'''
+        def apager_leds():
             for i in range(8):
-                estilo_led(i, fondo)
+                svg['led%d' % i].style.fill = COLOR_APAGADO
 
-        estilo_leds(COLOR_APAGADO)
+        apager_leds()
 
-        def llega_mensaje(mensaje):
-            datos = json.loads(mensaje.data)
-            document["un_texto"].text = datos["fecha"]
+        def on_message(msg):
+            datos = json.loads(msg.data)
+
             n = datos['led']
             print("Vamos a prender el led", n)
-            estilo_leds(COLOR_APAGADO)
-            estilo_led(n, COLOR_ENCENDIDO)
+            apager_leds()
+            svg['led%d' % n].style.fill = COLOR_ENCENDIDO
 
-        def alerta_cierre(evt):
-            alert("Se cerró el WebSocket")
+        def on_close(evt):
+            print("Se cerró el socket, reintentando en 2 segundo")
+            time.sleep(2)
+            connect()
 
         url = str(document.location.href)
         url = url.replace('http:', 'ws:')
 
-        ws = websocket.websocket(url+'websocket')
-        ws.bind('open', lambda x: print("Connect"))
-        ws.bind('message', llega_mensaje)
-        ws.bind('close', alerta_cierre)
+        def connect():
+            global ws
+            ws_url = url+'websocket'
+            print("Contectando a %s" % ws_url)
+            ws = websocket.websocket(ws_url)
+            ws.bind('open', lambda x: print("Connect"))
+            ws.bind('message', on_message)
+            ws.bind('close', on_close)
 
-        def on_click(ev):
-            alert("Me hiciciste click!!")
-
-        document["prueba"].bind("click", on_click)
+        connect()
 
         </script>
 </html>

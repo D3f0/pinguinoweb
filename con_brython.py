@@ -28,7 +28,7 @@ def websocket():
             ahora = "%s" % datetime.now()
             dato = {
                 'fecha': ahora,
-                'led': random.randint(0, 8)
+                'led': random.randint(0, 7)
             }
             cadena = json.dumps(dato)
             ws.send(cadena)

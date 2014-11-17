@@ -3,29 +3,73 @@
         <title>{% if title %}{{title}}{%else%}Sin título{%endif%}</title>
         <!-- En vez de jQUery, importamos brython -->
         <script src="/static/brython/brython.js"></script>
-        <script type="text/python">
-            from browser import document, alert, websocket
 
-            def llega_mensaje(mensaje):
-                document["un_texto"].text = mensaje.data
-
-
-            ws = websocket.websocket('ws://localhost:5000/websocket')
-            ws.bind('message', llega_mensaje)
-
-            def on_click(ev):
-                alert("Me hiciciste click!!")
-
-            document["prueba"].bind("click", on_click)
-
-
-
-        </script>
     </head>
     <body onload="brython()">
         Hola mundo!
         <button id="prueba">CLICK</button>
 
-        <p id="un_texto"></p>
+        <p id="un_texto">
+            &nbsp;
+        </p>
+        <object
+            data="/static/svg/ledarray.svg"
+            type="image/svg+xml"
+            id="ledarray">
+        </object>
+
     </body>
+
+    <script type="text/python">
+        from browser import document, alert, websocket
+        import json
+        from javascript import JSObject
+
+        COLOR_APAGADO = '#333'
+        COLOR_ENCENDIDO = 'green'
+
+        # Guardar la referencia al SVG embebido con <object>
+        ledArray = JSObject(JSObject(document['ledarray']).contentDocument)
+
+        def get_led(n):
+            selector_id = 'led%d' % n
+            return JSObject(ledArray.getElementById(selector_id))
+
+        def estilo_led(n, fondo):
+            '''Cambia el color de un led'''
+            led = get_led(n)
+            led.style.fill = fondo
+
+        def estilo_leds(fondo):
+            '''Cambia el color de todos los leds'''
+            for i in range(8):
+                estilo_led(i, fondo)
+
+        estilo_leds(COLOR_APAGADO)
+
+        def llega_mensaje(mensaje):
+            datos = json.loads(mensaje.data)
+            document["un_texto"].text = datos["fecha"]
+            n = datos['led']
+            print("Vamos a prender el led", n)
+            estilo_leds(COLOR_APAGADO)
+            estilo_led(n, COLOR_ENCENDIDO)
+
+        def alerta_cierre(evt):
+            alert("Se cerró el WebSocket")
+
+        url = str(document.location.href)
+        url = url.replace('http:', 'ws:')
+
+        ws = websocket.websocket(url+'websocket')
+        ws.bind('open', lambda x: print("Connect"))
+        ws.bind('message', llega_mensaje)
+        ws.bind('close', alerta_cierre)
+
+        def on_click(ev):
+            alert("Me hiciciste click!!")
+
+        document["prueba"].bind("click", on_click)
+
+        </script>
 </html>
